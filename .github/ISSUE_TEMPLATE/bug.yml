@@ -1,0 +1,38 @@
+name: Bug report
+description: netreach reports the wrong verdict, panics, or fails to parse a valid config.
+labels: ["bug"]
+body:
+  - type: textarea
+    id: fixture
+    attributes:
+      label: Minimal YAML fixture
+      description: The smallest config that reproduces the issue.
+      render: yaml
+    validations:
+      required: true
+  - type: input
+    id: command
+    attributes:
+      label: netreach command
+      placeholder: netreach analyze --config bug.yaml --src eni-a --dst eni-b --port 443 --protocol tcp
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Actual output
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+      description: What verdict + reason did you expect?
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: netreach version / commit
+      placeholder: v0.1.0 or commit hash

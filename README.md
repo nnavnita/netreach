@@ -1,5 +1,9 @@
 # netreach
 
+[![CI](https://github.com/nnavnita/netreach/actions/workflows/ci.yml/badge.svg)](https://github.com/nnavnita/netreach/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+![Go](https://img.shields.io/badge/Go-1.22%2B-00ADD8)
+
 Reachability analyzer for simplified AWS-style network models. Give it a YAML description of your VPCs, subnets, security groups, NACLs, route tables, and transit gateway attachments, and it answers whether a packet from A to B is `REACHABLE` or `BLOCKED` — and if blocked, exactly which rule stopped it. Positioned as the sort of static-analysis tooling AWS Core Networking teams reach for when reviewing a design.
 
 ## Install
@@ -82,6 +86,33 @@ make run-example
 - Not modeled: VPC peering, PrivateLink, load balancers, IAM, IPv6, source/dest NAT, path MTU.
 - Longest-prefix match for route lookup. NACL rules evaluated in ascending rule-no order (first match wins).
 - Security groups are stateful (return traffic implicitly allowed by the model — we only check the initiating direction).
+
+## Comparison
+
+| Tool                              | Input                | Output          | Offline? | Multi-account |
+| --------------------------------- | -------------------- | --------------- | -------- | ------------- |
+| AWS VPC Reachability Analyzer     | Live account         | Path + verdict  | No       | Limited       |
+| AWS Network Access Analyzer       | Live account         | Findings        | No       | Yes           |
+| `terraform plan` + human review   | HCL                  | Diff            | Yes      | Manual        |
+| **netreach**                      | YAML (or roll-your-own IR) | REACHABLE / BLOCKED + citing rule | **Yes** | Yes (aggregate across accounts into one YAML) |
+
+netreach is not a replacement for the AWS Reachability Analyzer — it's the
+offline, CI-friendly cousin. Point it at a design doc before you apply the
+Terraform, not after prod is on fire.
+
+## Roadmap
+
+- [ ] Ingest Terraform state (`terraform.tfstate` JSON) directly
+- [ ] Ingest CloudFormation templates
+- [ ] VPC peering + PrivateLink
+- [ ] IPv6 support
+- [ ] `netreach diff` — compute reachability delta between two configs
+- [ ] JSON output for CI pipeline integration
+- [ ] Web UI (`netreach serve`) for graph exploration
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## License
 
