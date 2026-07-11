@@ -1,0 +1,98 @@
+vpcs:
+  - id: vpc-a
+    cidr: 10.0.0.0/16
+    subnets:
+      - id: subnet-a1
+        cidr: 10.0.1.0/24
+        route_table: rtb-a1
+  - id: vpc-b
+    cidr: 10.1.0.0/16
+    subnets:
+      - id: subnet-b1
+        cidr: 10.1.1.0/24
+        route_table: rtb-b1
+
+route_tables:
+  - id: rtb-a1
+    routes:
+      - dest: 10.0.0.0/16
+        target: local
+      - dest: 10.1.0.0/16
+        target: tgw-1
+  - id: rtb-b1
+    routes:
+      - dest: 10.1.0.0/16
+        target: local
+      - dest: 10.0.0.0/16
+        target: tgw-1
+
+security_groups:
+  - id: sg-web
+    ingress:
+      - from: 10.0.0.0/8
+        port: 443
+        protocol: tcp
+    egress:
+      - to: 0.0.0.0/0
+        port: all
+        protocol: all
+  - id: sg-db
+    ingress:
+      - from: 10.0.0.0/8
+        port: 5432
+        protocol: tcp
+    egress:
+      - to: 0.0.0.0/0
+        port: all
+        protocol: all
+
+nacls:
+  - id: nacl-a1
+    subnet: subnet-a1
+    rules:
+      - rule_no: 100
+        direction: ingress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+      - rule_no: 100
+        direction: egress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+  - id: nacl-b1
+    subnet: subnet-b1
+    rules:
+      - rule_no: 100
+        direction: ingress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+      - rule_no: 100
+        direction: egress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+
+enis:
+  - id: eni-web
+    subnet: subnet-a1
+    ip: 10.0.1.10
+    security_groups: [sg-web]
+  - id: eni-db
+    subnet: subnet-b1
+    ip: 10.1.1.20
+    security_groups: [sg-db]
+
+transit_gateway:
+  id: tgw-1
+  attachments: [vpc-a, vpc-b]
+  route_table:
+    - dest: 10.0.0.0/16
+      target: vpc-a
+    - dest: 10.1.0.0/16
+      target: vpc-b

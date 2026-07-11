@@ -1,0 +1,80 @@
+vpcs:
+  - id: vpc-a
+    cidr: 10.0.0.0/16
+    subnets:
+      - id: subnet-a1
+        cidr: 10.0.1.0/24
+        route_table: rtb-a1
+      - id: subnet-a2
+        cidr: 10.0.2.0/24
+        route_table: rtb-a1
+
+route_tables:
+  - id: rtb-a1
+    routes:
+      - dest: 10.0.0.0/16
+        target: local
+      - dest: 0.0.0.0/0
+        target: igw-1
+
+security_groups:
+  - id: sg-web
+    ingress:
+      - from: 0.0.0.0/0
+        port: 443
+        protocol: tcp
+    egress:
+      - to: 0.0.0.0/0
+        port: all
+        protocol: all
+  - id: sg-app
+    ingress:
+      - from: 10.0.1.0/24
+        port: 8080
+        protocol: tcp
+    egress:
+      - to: 0.0.0.0/0
+        port: all
+        protocol: all
+
+nacls:
+  - id: nacl-a1
+    subnet: subnet-a1
+    rules:
+      - rule_no: 100
+        direction: ingress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+      - rule_no: 100
+        direction: egress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+  - id: nacl-a2
+    subnet: subnet-a2
+    rules:
+      - rule_no: 100
+        direction: ingress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+      - rule_no: 100
+        direction: egress
+        action: allow
+        cidr: 0.0.0.0/0
+        port: all
+        protocol: all
+
+enis:
+  - id: eni-web
+    subnet: subnet-a1
+    ip: 10.0.1.10
+    security_groups: [sg-web]
+  - id: eni-app
+    subnet: subnet-a2
+    ip: 10.0.2.10
+    security_groups: [sg-app]

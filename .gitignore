@@ -1,0 +1,9 @@
+netreach
+netreach.exe
+*.out
+*.test
+coverage.out
+dist/
+.idea/
+.vscode/
+.DS_Store
